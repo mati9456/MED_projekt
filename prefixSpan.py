@@ -1,4 +1,4 @@
-import dataLoading
+import data_loader
 import numpy as np
 import itertools
 
@@ -10,7 +10,7 @@ file_path = "dataSets/BIBLE.txt"
 #file_path = "dataSets/kosarak_sequences.txt"
 
 
-database = dataLoading.importDatabasa(file_path)
+database = data_loader.importDatabase(file_path)
 
 def prefixSpan(database, minsup, S=[]):
     
