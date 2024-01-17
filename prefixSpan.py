@@ -1,4 +1,5 @@
 from collections import defaultdict
+from io import TextIOWrapper
 import data_loader
 
 """
@@ -80,50 +81,37 @@ def project_sequence(sequence, prefix, forms_one_element = False):
     return []
 
 
-def prefix_span(min_support, database, pattern = [], verbose = False):
+def prefix_span(min_support, database, output_file: TextIOWrapper, pattern = [], verbose = False):
 
     """
     The PrefixSpan algorithm.
     """
     if min_support <= 0 or len(database) <= 0:
-        return []
+        return
     elements, elements_part = scan_database(database, min_support)
     if len(elements) + len(elements_part) == 0:
-        return []
-    
-    if verbose == True:
-        if len(elements) > 0:
-            for element, v in elements.items():
-                print(f"Pattern: {[*pattern, {element}]} has support {v}")
-        if len(elements_part) > 0:
-            for element_part, v in elements_part.items():
-                print(f"Pattern: {[*pattern[:-1], {*pattern[-1], element_part}]} has support {v}")
+        return
 
-    for element, _ in elements.items():
+    for element, v in elements.items():
         projected_database = project_database(database, element)
-        prefix_span(min_support, projected_database, [*pattern, {element}])
-    for element_part, _ in elements_part.items():
+        new_pattern = [*pattern, {element}]
+        if verbose:
+            print(f"Pattern: {new_pattern} has support {v}")
+        output_file.write(' -1 '.join([' '.join(map(str, x)) for x in new_pattern]) + f" -1 #SUP: {v}\n")
+        prefix_span(min_support, projected_database, output_file, new_pattern, verbose)
+    for element_part, v in elements_part.items():
         projected_database = project_database(database, element_part, True)
-        prefix_span(min_support, projected_database, [*pattern[:-1], {*pattern[-1], element_part}])
-
-
-# def write_patterns_to_file(patterns, output_file):
-#     with open(output_file, 'w') as file:
-#         for pattern in patterns:
-#             file.write(str(pattern) + '\n')
+        new_pattern = [*pattern[:-1], {*pattern[-1], element_part}]
+        if verbose:
+            print(f"Pattern: {new_pattern} has support {v}")
+        output_file.write(' -1 '.join([' '.join(map(str, x)) for x in new_pattern]) + f" -1 #SUP: {v}\n")
+        prefix_span(min_support, projected_database, output_file, new_pattern, verbose)
 
 
 if __name__ == "__main__":
-    file_path = "dataSets/test.txt"
+    file_path = "dataSets/BIBLE.txt"
 
     database = data_loader.importDatabase(file_path)
 
-    # a,b,c,d = 1,2,3,4
-    # database = [
-    #     [{a,b}, {c}, {a}],
-    #     [{a,b}, {b}, {c}],
-    #     [{b}, {c}, {d}],
-    #     [{b}, {a,b}, {c}]
-    # ]
-
-    prefix_span(2, database)
+    with open('prefix_span_result.txt', 'w') as file:
+        prefix_span(4000, database, file) # 11%
