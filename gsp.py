@@ -13,7 +13,6 @@ def gsp(min_support, database, output_file: TextIOWrapper, verbose=False):
     if len(l1) == 0:
         return []
     
-    # print(l1)
     for pattern, v in l1.items():
         if verbose:
             print(f"Pattern: [{{{pattern}}}] has support {v}")
@@ -36,9 +35,6 @@ def gsp(min_support, database, output_file: TextIOWrapper, verbose=False):
                 print(f"Pattern: {candidates[index]} has support {support}")
             output_file.write(' -1 '.join([' '.join(map(str, x)) for x in candidates[index]]) + f" -1 #SUP: {support}\n")
 
-    # print(candidates_accepted)
-    # print(accepted_supports)
-
     while len(candidates_accepted) != 0:
         candidates = generate_candidates(candidates_accepted)
         candidates_support = []
@@ -54,10 +50,6 @@ def gsp(min_support, database, output_file: TextIOWrapper, verbose=False):
                 if verbose:
                     print(f"Pattern: {candidates[index]} has support {support}")
                 output_file.write(' -1 '.join([' '.join(map(str, x)) for x in candidates[index]]) + f" -1 #SUP: {support}\n")
-
-        # print(candidates_accepted)
-        # print(accepted_supports)
-
     
     return []
 
@@ -86,22 +78,18 @@ def generate_l1(database, min_support):
 
 def generate_candidates(L):
     candidates = []
-    # L = [[{a}, {b}, {c}], [{ab}, {c}], [{ad}, {c}]]
-    # elements = {a: 3, b: 2, c: 3, d: 1}
-    # elements.keys()
 
     elements = generate_l1(L, 1)
     elements = elements.keys()
 
-    # elements = [a,b,c,d]
     for seq in L:
         for el in elements:
             candidates.append([*seq, {el}])
             if not el in seq[-1]:
-                if el > list(seq[-1])[0]:
-                    continue
                 candidates.append([*seq[:-1], {*seq[-1], el}])
-    return candidates
+
+    # return candidates
+    return remove_duplicates(candidates)
 
 def calculate_support(pattern, database):
     # Initialize support count
@@ -136,6 +124,17 @@ def dict2database(dict):
         database.append([{item}])
     return database
 
+def remove_duplicates(arr):
+    unique_elements = set()
+    result = []
+
+    for sub_array in arr:
+        unique_sub_array = [frozenset(sub_set) for sub_set in sub_array]
+        if tuple(unique_sub_array) not in unique_elements:
+            unique_elements.add(tuple(unique_sub_array))
+            result.append(sub_array)
+
+    return result
 
 if __name__ == "__main__":
     file_path = "dataSets/LEVIATHAN.txt"
@@ -143,4 +142,4 @@ if __name__ == "__main__":
     database = data_loader.importDatabase(file_path)
 
     with open('gsp_result.txt', 'w') as file:
-        gsp(2000, database, file, verbose=True)
+        gsp(1000, database, file, verbose=True)
