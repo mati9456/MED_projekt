@@ -1,6 +1,7 @@
 from collections import defaultdict
 from io import TextIOWrapper
 import data_loader
+import sys
 
 """
 In this implementation sequential database is an array of sequences.
@@ -108,9 +109,16 @@ def prefix_span(min_support, database, output_file: TextIOWrapper, pattern = [],
 
 
 if __name__ == "__main__":
-    file_path = "dataSets/LEVIATHAN.txt"
+    if len(sys.argv) < 3:
+        print("Example usage:\n"
+              "\n"
+              f"python3 {sys.argv[0]} BIBLE 4000\n")
+        exit()
+
+    file_path = f"dataSets/{sys.argv[1]}.txt"
 
     database = data_loader.importDatabase(file_path)
 
+    minSup = int(sys.argv[2])
     with open('prefix_span_result.txt', 'w') as file:
-        prefix_span(2000, database, file, verbose=True)
+        prefix_span(minSup, database, file, verbose=True)

@@ -1,6 +1,7 @@
 from collections import defaultdict
 from io import TextIOWrapper
 import data_loader
+import sys
 
 
 def gsp(min_support, database, output_file: TextIOWrapper, verbose=False):
@@ -137,9 +138,17 @@ def remove_duplicates(arr):
     return result
 
 if __name__ == "__main__":
-    file_path = "dataSets/LEVIATHAN.txt"
+    if len(sys.argv) < 3:
+        print("Example usage:\n"
+              "\n"
+              f"python3 {sys.argv[0]} BIBLE 4000\n")
+        exit()
+
+    file_path = f"dataSets/{sys.argv[1]}.txt"
 
     database = data_loader.importDatabase(file_path)
 
+    minSup = int(sys.argv[2])
+
     with open('gsp_result.txt', 'w') as file:
-        gsp(1000, database, file, verbose=True)
+        gsp(minSup, database, file, verbose=True)
