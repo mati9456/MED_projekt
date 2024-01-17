@@ -82,7 +82,6 @@ def project_sequence(sequence, prefix, forms_one_element = False):
 
 
 def prefix_span(min_support, database, output_file: TextIOWrapper, pattern = [], verbose = False):
-
     """
     The PrefixSpan algorithm.
     """
@@ -109,9 +108,9 @@ def prefix_span(min_support, database, output_file: TextIOWrapper, pattern = [],
 
 
 if __name__ == "__main__":
-    file_path = "dataSets/BIBLE.txt"
+    file_path = "dataSets/LEVIATHAN.txt"
 
     database = data_loader.importDatabase(file_path)
 
     with open('prefix_span_result.txt', 'w') as file:
-        prefix_span(4000, database, file) # 11%
+        prefix_span(2000, database, file, verbose=True)

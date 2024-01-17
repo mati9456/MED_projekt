@@ -1,12 +1,11 @@
 from collections import defaultdict
+from io import TextIOWrapper
 import data_loader
-import numpy
-import copy
 
 
-def gsp(min_support, database, verbose=False):
+def gsp(min_support, database, output_file: TextIOWrapper, verbose=False):
     """
-    The FreeSpan algorithm.
+    The GSP algorithm.
     """
     if min_support <= 0 or len(database) <= 0:
         return []
@@ -14,12 +13,15 @@ def gsp(min_support, database, verbose=False):
     if len(l1) == 0:
         return []
     
-    print(l1)
+    # print(l1)
+    for pattern, v in l1.items():
+        if verbose:
+            print(f"Pattern: [{{{pattern}}}] has support {v}")
+        output_file.write(f"{pattern} -1 #SUP: {v}\n")
     
     l1_database = dict2database(l1)
 
     candidates = generate_candidates(l1_database)
-    #candidates_support = scan_candidates(database, candidates)
     candidates_support = []
     for c in candidates:
         candidates_support.append(calculate_support(c, database))
@@ -30,13 +32,15 @@ def gsp(min_support, database, verbose=False):
         if support >= min_support:
             candidates_accepted.append(candidates[index])
             accepted_supports.append(support)
+            if verbose:
+                print(f"Pattern: {candidates[index]} has support {support}")
+            output_file.write(' -1 '.join([' '.join(map(str, x)) for x in candidates[index]]) + f" -1 #SUP: {support}\n")
 
-    print(candidates_accepted)
-    print(accepted_supports)
+    # print(candidates_accepted)
+    # print(accepted_supports)
 
     while len(candidates_accepted) != 0:
         candidates = generate_candidates(candidates_accepted)
-        #candidates_support = scan_candidates(database, candidates)
         candidates_support = []
         for c in candidates:
             candidates_support.append(calculate_support(c, database))
@@ -47,9 +51,12 @@ def gsp(min_support, database, verbose=False):
             if support >= min_support:
                 candidates_accepted.append(candidates[index])
                 accepted_supports.append(support)
+                if verbose:
+                    print(f"Pattern: {candidates[index]} has support {support}")
+                output_file.write(' -1 '.join([' '.join(map(str, x)) for x in candidates[index]]) + f" -1 #SUP: {support}\n")
 
-        print(candidates_accepted)
-        print(accepted_supports)
+        # print(candidates_accepted)
+        # print(accepted_supports)
 
     
     return []
@@ -96,21 +103,6 @@ def generate_candidates(L):
                 candidates.append([*seq[:-1], {*seq[-1], el}])
     return candidates
 
-def scan_candidates(database, candidates):
-    supports = []
-    for pattern in candidates:
-        support = 0
-        for sequence in database:
-            count = 0
-            for itemset_c in pattern:
-                for itemset_s in sequence:
-                    if itemset_c.issubset(itemset_s):
-                        count = count + 1
-                if count >= len(pattern):
-                    support = support + 1
-        supports.append(support)
-    return supports
-
 def calculate_support(pattern, database):
     # Initialize support count
     support_count = 0
@@ -145,8 +137,10 @@ def dict2database(dict):
     return database
 
 
-file_path = "dataSets/test3.txt"
+if __name__ == "__main__":
+    file_path = "dataSets/LEVIATHAN.txt"
 
-database = data_loader.importDatabase(file_path)
+    database = data_loader.importDatabase(file_path)
 
-gsp(3, database, True)
+    with open('gsp_result.txt', 'w') as file:
+        gsp(2000, database, file, verbose=True)
