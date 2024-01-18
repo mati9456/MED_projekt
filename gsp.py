@@ -148,7 +148,10 @@ if __name__ == "__main__":
 
     database = data_loader.importDatabase(file_path)
 
-    minSup = int(sys.argv[2])
+    if sys.argv[2][-1] == "%":
+        minSup = int(len(database) * 0.01 * float(sys.argv[2][:-1]))
+    else:
+        minSup = int(sys.argv[2])
 
     with open('gsp_result.txt', 'w') as file:
         gsp(minSup, database, file, verbose=True)
