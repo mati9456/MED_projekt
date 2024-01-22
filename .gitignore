@@ -7,3 +7,8 @@ gsp_result.txt
 gsp_result.txt
 output.txt
 prefix_span_result.txt
+*.pyc
+gsp_result.txt
+prefix_span_result.txt
+temp_sampled.txt
+*.csv
